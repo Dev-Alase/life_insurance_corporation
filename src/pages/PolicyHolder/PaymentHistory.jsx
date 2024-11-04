@@ -1,35 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { CheckCircle, AlertCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const PaymentHistory = () => {
   // Simulated data
-  const payments = [
-    {
-      id: 'PAY001',
-      policyId: 'POL001',
-      amount: 150,
-      status: 'successful',
-      date: '2024-03-01',
-      type: 'Life Insurance'
-    },
-    {
-      id: 'PAY002',
-      policyId: 'POL002',
-      amount: 200,
-      status: 'successful',
-      date: '2024-02-01',
-      type: 'Health Insurance'
-    },
-    {
-      id: 'PAY003',
-      policyId: 'POL001',
-      amount: 150,
-      status: 'failed',
-      date: '2024-01-01',
-      type: 'Life Insurance'
+
+  const {user}  = useAuth()
+  const [payments,setPayments] = useState([])
+
+  useEffect(() => {
+
+    const getpayments = async() => {
+
+      const response = await fetch("http://localhost:5000/api/payments",{
+        method : "GET",
+        headers : {
+          'Content-Type' : 'application-json',
+          'Authorization' : `Bearer ${user.token}`
+        }
+      })
+
+      const data = await response.json();
+      // console.log(data)
+      setPayments(data)
     }
-  ];
+
+    getpayments()
+
+  },[])
+
 
   return (
     <div className="space-y-6">
@@ -53,7 +53,7 @@ const PaymentHistory = () => {
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Reference
+                  Reference 
                 </th>
               </tr>
             </thead>
@@ -64,7 +64,7 @@ const PaymentHistory = () => {
                     {format(new Date(payment.date), 'MMM dd, yyyy')}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {payment.type}
+                    {payment.policy_type}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     ${payment.amount}

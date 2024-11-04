@@ -1,34 +1,62 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Star, MessageCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { FaUserTie } from "react-icons/fa6";
 
 const AgentList = () => {
+
+  const {user} = useAuth()
+  const [agents,setAgents] = useState([])
+
   // Simulated data
-  const agents = [
-    {
-      id: 'AGT001',
-      name: 'Sarah Johnson',
-      specialization: 'Life Insurance',
-      rating: 4.8,
-      experience: '8 years',
-      imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150&h=150'
-    },
-    {
-      id: 'AGT002',
-      name: 'Michael Chen',
-      specialization: 'Health Insurance',
-      rating: 4.9,
-      experience: '10 years',
-      imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150&h=150'
-    },
-    {
-      id: 'AGT003',
-      name: 'Emily Rodriguez',
-      specialization: 'Property Insurance',
-      rating: 4.7,
-      experience: '6 years',
-      imageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150&h=150'
+  // const agents = [
+  //   {
+  //     id: 'AGT001',
+  //     name: 'Sarah Johnson',
+  //     specialization: 'Life Insurance',
+  //     rating: 4.8,
+  //     experience: '8 years',
+  //     imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150&h=150'
+  //   },
+  //   {
+  //     id: 'AGT002',
+  //     name: 'Michael Chen',
+  //     specialization: 'Health Insurance',
+  //     rating: 4.9,
+  //     experience: '10 years',
+  //     imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=150&h=150'
+  //   },
+  //   {
+  //     id: 'AGT003',
+  //     name: 'Emily Rodriguez',
+  //     specialization: 'Property Insurance',
+  //     rating: 4.7,
+  //     experience: '6 years',
+  //     imageUrl: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150&h=150'
+  //   }
+  // ];
+
+  useEffect(() => {
+
+    const getAgents = async () => {
+
+      const response = await fetch("http://localhost:5000/api/agents",{
+        method : "GET",
+        headers : {
+          'Content-Type' : 'application/json',
+          'Authorization' : `Bearer ${user.token}`
+        }
+      })
+
+      const data = await response.json();
+
+      console.log(data);
+      setAgents(data);
     }
-  ];
+
+    getAgents()
+
+  },[])
 
   return (
     <div className="space-y-6">
@@ -38,15 +66,11 @@ const AgentList = () => {
         {agents.map((agent) => (
           <div key={agent.id} className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="p-6">
-              <div className="flex items-center space-x-4">
-                <img
-                  src={agent.imageUrl}
-                  alt={agent.name}
-                  className="w-16 h-16 rounded-full object-cover"
-                />
+              <div className="flex items-center space-x-4 gap-2">
+                <FaUserTie className='text-3xl'/>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">{agent.name}</h3>
-                  <p className="text-sm text-gray-500">{agent.specialization}</p>
+                  <h3 className="text-lg font-semibold text-gray-900">{agent.full_name}</h3>
+                  {/* <p className="text-sm text-gray-500">{agent.specialization}</p> */}
                 </div>
               </div>
 
@@ -55,7 +79,7 @@ const AgentList = () => {
                   <Star className="w-4 h-4 text-yellow-400 mr-1" />
                   <span>{agent.rating} Rating</span>
                 </div>
-                <p className="text-sm text-gray-500">{agent.experience} Experience</p>
+                <p className="text-sm text-gray-500">{agent.total_policies} Total Policies</p>
               </div>
 
               <div className="mt-6">
