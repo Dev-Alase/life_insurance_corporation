@@ -18,7 +18,7 @@ const PolicyHolderDashboard = () => {
       type: 'Life Insurance',
       status: 'active',
       premium: 150,
-      expiryDate: '2025-12-31',
+      expiry_date: '2025-12-31',
       claimStatus: null
     },
     {
@@ -26,7 +26,7 @@ const PolicyHolderDashboard = () => {
       type: 'Health Insurance',
       status: 'active',
       premium: 200,
-      expiryDate: '2025-06-30',
+      expiry_date: '2025-06-30',
       claimStatus: 'processing'
     }
   ];
