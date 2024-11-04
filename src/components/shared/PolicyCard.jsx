@@ -23,7 +23,7 @@ const PolicyCard = ({ policy, onAction, actionLabel }) => {
         <div className="flex items-center text-gray-600">
           <Calendar className="w-4 h-4 mr-2" />
           <span className="text-sm">
-            {/* Valid until: {format(new Date(policy.expiryDate), 'MMM dd, yyyy')} */}
+            Valid until: {format(new Date(policy.expiry_date), 'MMM dd, yyyy')}
           </span>
         </div>
         
