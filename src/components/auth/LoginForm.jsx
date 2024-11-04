@@ -11,22 +11,29 @@ const LoginForm = ({ userType }) => {
 
   const onSubmit = async (data) => {
     try {
-      // Simulating API call
-      const response = await fetch("http://localhost:5000/api/auth/login",{
-
-        method : "POST",
-        headers : {
-          "Content-Type" : "application/json"
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
         },
-        body : JSON.stringify(data)
+        body: JSON.stringify(data)
+      });
 
-      })
+      if (!response.ok) {
+        throw new Error('Invalid credentials');
+      }
 
-      const userData = await response.json()
-      
-      login(userData);
-      navigate(`/${userType}/dashboard`);
+      const userData = await response.json();
+      console.log(userData)
+      // Make sure `userData` contains the necessary information, especially the token
+      if (userData && userData.token) {
+        login(userData); // Set user in AuthContext
+        navigate(`/${userType}/dashboard`);
+      } else {
+        throw new Error('Login failed: Token not received');
+      }
     } catch (error) {
+      console.error('Login error:', error);
       setError('Invalid credentials');
     }
   };

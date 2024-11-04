@@ -1,34 +1,42 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PolicyCard from '../../components/shared/PolicyCard';
 import { Plus } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const PolicyHolderPolicies = () => {
   const [showNewPolicyForm, setShowNewPolicyForm] = useState(false);
+  const [policies, setPolicies] = useState([]);
+  const { user } = useAuth();
 
-  // Simulated data
-  const policies = [
-    {
-      id: 'POL001',
-      type: 'Life Insurance',
-      status: 'active',
-      premium: 150,
-      expiryDate: '2025-12-31'
-    },
-    {
-      id: 'POL002',
-      type: 'Health Insurance',
-      status: 'active',
-      premium: 200,
-      expiryDate: '2025-06-30'
-    },
-    {
-      id: 'POL003',
-      type: 'Vehicle Insurance',
-      status: 'pending',
-      premium: 180,
-      expiryDate: '2025-08-15'
-    }
-  ];
+  useEffect(() => {
+    const getPolicies = async () => {
+      if (!user || !user.token) return; // Ensure user is logged in with a token
+
+      try {
+        const response = await fetch("http://localhost:5000/api/policies", {
+          method: "GET",
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch policies');
+        }
+
+        const data = await response.json();
+        setPolicies(data);
+      } catch (error) {
+        console.error('Error fetching policies:', error);
+      }
+    };
+
+    getPolicies();
+  }, []);
+
+
+  console.log(user)
 
   return (
     <div className="space-y-6">
@@ -44,7 +52,7 @@ const PolicyHolderPolicies = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {policies.map((policy) => (
+        {policies?.map((policy) => (
           <PolicyCard
             key={policy.id}
             policy={policy}
