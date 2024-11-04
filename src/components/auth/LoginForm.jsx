@@ -12,12 +12,17 @@ const LoginForm = ({ userType }) => {
   const onSubmit = async (data) => {
     try {
       // Simulating API call
-      const userData = {
-        id: '123',
-        email: data.email,
-        fullName: 'John Doe',
-        type: userType
-      };
+      const response = await fetch("http://localhost:5000/api/auth/login",{
+
+        method : "POST",
+        headers : {
+          "Content-Type" : "application/json"
+        },
+        body : JSON.stringify(data)
+
+      })
+
+      const userData = await response.json()
       
       login(userData);
       navigate(`/${userType}/dashboard`);

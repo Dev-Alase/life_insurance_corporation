@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { json } from 'react-router-dom';
 
 const RegisterForm = ({ userType }) => {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -12,12 +13,18 @@ const RegisterForm = ({ userType }) => {
   const onSubmit = async (data) => {
     try {
       // Simulating API call
-      const userData = {
-        id: '123',
-        email: data.email,
-        fullName: data.fullName,
-        type: userType
-      };
+      data.type = userType
+      const response = await fetch("http://localhost:5000/api/auth/register",{
+
+        method : "POST",
+        headers : {
+          "Content-Type" : "application/json"
+        },
+        body : JSON.stringify(data)
+
+      })
+
+      const userData = await response.json();
       
       login(userData);
       navigate(`/${userType}/dashboard`);
