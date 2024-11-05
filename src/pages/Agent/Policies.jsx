@@ -9,7 +9,7 @@ const AgentPolicies = () => {
       type: 'Life Insurance',
       status: 'active',
       premium: 150,
-      expiryDate: '2025-12-31',
+      expiry_date: '2025-12-31',
       clientName: 'John Doe'
     },
     {
@@ -17,7 +17,7 @@ const AgentPolicies = () => {
       type: 'Health Insurance',
       status: 'active',
       premium: 200,
-      expiryDate: '2025-06-30',
+      expiry_date: '2025-06-30',
       clientName: 'Jane Smith'
     },
     {
@@ -25,7 +25,7 @@ const AgentPolicies = () => {
       type: 'Vehicle Insurance',
       status: 'pending',
       premium: 180,
-      expiryDate: '2025-08-15',
+      expiry_date: '2025-08-15',
       clientName: 'Mike Johnson'
     }
   ];

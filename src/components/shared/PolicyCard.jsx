@@ -1,8 +1,12 @@
 import React from 'react';
 import { Calendar, DollarSign, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { useAuth } from '../../context/AuthContext';
 
 const PolicyCard = ({ policy, onAction, actionLabel }) => {
+
+  const {user} = useAuth()
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start mb-4">
@@ -44,14 +48,25 @@ const PolicyCard = ({ policy, onAction, actionLabel }) => {
         )}
       </div>
 
-      {onAction && (
-        <button
-          onClick={() => onAction(policy)}
-          className="mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          {actionLabel}
-        </button>
-      )}
+      <div className='flex gap-4'>
+          {onAction && (
+              <button
+                onClick={() => onAction(policy)}
+                className="mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-white hover:text-blue-600 transition-colors border-2 border-blue-600"
+              >
+                {actionLabel}
+              </button>
+            )}
+            {user.user.type === "policyholder" && <button
+              onClick={() => onAction(policy)}
+              className="mt-4 w-full px-4 py-2 bg-pink-800 text-white rounded-md hover:bg-white hover:text-pink-800 transition-colors border-2 border-pink-800"
+            >
+              Claim
+            </button>}
+              
+      </div>
+
+      
     </div>
   );
 };

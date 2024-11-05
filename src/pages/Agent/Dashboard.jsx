@@ -18,7 +18,7 @@ const AgentDashboard = () => {
       type: 'Vehicle Insurance',
       status: 'pending',
       premium: 180,
-      expiryDate: '2025-08-15',
+      expiry_date: '2025-08-15',
       clientName: 'John Doe'
     },
     {
@@ -26,7 +26,7 @@ const AgentDashboard = () => {
       type: 'Property Insurance',
       status: 'pending',
       premium: 250,
-      expiryDate: '2025-09-30',
+      expiry_date: '2025-09-30',
       clientName: 'Jane Smith'
     }
   ];

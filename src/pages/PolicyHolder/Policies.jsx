@@ -36,7 +36,7 @@ const PolicyHolderPolicies = () => {
   }, []);
 
 
-  console.log(user)
+  // console.log(user)
 
   return (
     <div className="space-y-6">
