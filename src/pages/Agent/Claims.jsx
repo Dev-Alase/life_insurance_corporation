@@ -1,37 +1,43 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Clock, CheckCircle, XCircle } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+
 
 const Claims = () => {
+
+  const { user } = useAuth()
+  const [claims,setClaims] = useState([])
+
   // Simulated data
-  const claims = [
-    {
-      id: 'CLM001',
-      policyId: 'POL002',
-      clientName: 'John Doe',
-      type: 'Health Insurance',
-      amount: 5000,
-      status: 'pending',
-      submittedDate: '2024-03-15'
-    },
-    {
-      id: 'CLM002',
-      policyId: 'POL004',
-      clientName: 'Jane Smith',
-      type: 'Vehicle Insurance',
-      amount: 3500,
-      status: 'approved',
-      submittedDate: '2024-03-10'
-    },
-    {
-      id: 'CLM003',
-      policyId: 'POL007',
-      clientName: 'Mike Johnson',
-      type: 'Property Insurance',
-      amount: 15000,
-      status: 'rejected',
-      submittedDate: '2024-03-05'
-    }
-  ];
+  // const claims = [
+  //   {
+  //     id: 'CLM001',
+  //     policyId: 'POL002',
+  //     clientName: 'John Doe',
+  //     type: 'Health Insurance',
+  //     amount: 5000,
+  //     status: 'pending',
+  //     submittedDate: '2024-03-15'
+  //   },
+  //   {
+  //     id: 'CLM002',
+  //     policyId: 'POL004',
+  //     clientName: 'Jane Smith',
+  //     type: 'Vehicle Insurance',
+  //     amount: 3500,
+  //     status: 'approved',
+  //     submittedDate: '2024-03-10'
+  //   },
+  //   {
+  //     id: 'CLM003',
+  //     policyId: 'POL007',
+  //     clientName: 'Mike Johnson',
+  //     type: 'Property Insurance',
+  //     amount: 15000,
+  //     status: 'rejected',
+  //     submittedDate: '2024-03-05'
+  //   }
+  // ];
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -45,6 +51,27 @@ const Claims = () => {
         return null;
     }
   };
+
+  useEffect(() => {
+
+    const getClaims = async() => {
+
+      const response = await fetch("http://localhost:5000/api/claims",{
+        method : "GET",
+        headers : {
+          'Content-Type' : 'application/json',
+          'Authorization' : `Bearer ${user.token}`
+        }
+      })
+
+      const data = await response.json()
+      console.log(data)
+      setClaims(data)
+    }
+
+    getClaims()
+
+  },[])
 
   return (
     <div className="space-y-6">
@@ -81,10 +108,10 @@ const Claims = () => {
                   {claim.id}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {claim.clientName}
+                  {claim.policyholder_name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {claim.type}
+                  {claim.policy_type}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   ${claim.amount}

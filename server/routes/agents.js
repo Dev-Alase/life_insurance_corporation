@@ -1,6 +1,6 @@
 import express from 'express';
 import pool from '../config/database.js';
-import { isPolicyHolder } from '../middleware/auth.js';
+import { isPolicyHolder,isAgent } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -50,5 +50,63 @@ router.post('/:id/rate', isPolicyHolder, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
+// p.id AS policy_id, 
+// p.type AS policy_type, 
+// p.status AS policy_status, 
+// p.premium, 
+// p.expiry_date, 
+// p.created_at AS policy_created_at,
+// c.id AS claim_id,
+// c.amount AS claim_amount, 
+// c.description AS claim_description, 
+// c.status AS claim_status, 
+// c.created_at AS claim_created_at
+
+router.get('/approvals', isAgent, async (req, res) => {
+  try {
+    const agentId = req.user.id; // Assuming `agent_id` is stored in `req.user`
+
+    // Query to get pending policies for the agent
+    const [pendingPolicies] = await pool.query(
+      `
+      SELECT 
+        p.*
+      FROM 
+        policies as p
+      WHERE 
+        agent_id = ? 
+        AND status = 'pending'
+      `,
+      [agentId]
+    );
+
+    // Query to get pending claims related to the agent's policies
+    const [pendingClaims] = await pool.query(
+      `
+      SELECT 
+        c.*
+      FROM 
+        claims c
+      JOIN 
+        policies p ON p.id = c.policy_id
+      WHERE 
+        p.agent_id = ? 
+        AND c.status = 'pending'
+      `,
+      [agentId]
+    );
+
+    // Combine the results into a single response
+    res.json({
+      pendingPolicies,
+      pendingClaims,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 export default router;
