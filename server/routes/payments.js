@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
        ORDER BY py.date DESC`,
       [req.user.id]
     );
-
+    
     res.json(payments);
   } catch (error) {
     console.error(error);

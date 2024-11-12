@@ -158,31 +158,40 @@ DELIMITER ;
 
 DELIMITER $$
 
-CREATE TRIGGER UpdatePolicyStatusOnExpiry
-BEFORE UPDATE ON policies
+CREATE TRIGGER UpdatePolicyStatusOnPayment
+AFTER INSERT ON payments
 FOR EACH ROW
 BEGIN
-  -- Check if the expiry date is in the past
-  IF NEW.expiry_date < CURDATE() THEN
-    SET NEW.status = 'expired';
-  
-  -- Check if the number of premiums paid has reached the total number of premiums
-  ELSEIF (
+  -- Check if all premiums have been paid
+  IF (
     SELECT COUNT(*) 
     FROM payments 
-    WHERE policy_id = NEW.id AND status = 'successful'
-  ) >= NEW.total_premiums THEN
-    SET NEW.status = 'expired';
-
-  -- Check if there are any approved claims for this policy
-  ELSEIF EXISTS (
-    SELECT 1 
-    FROM claims 
-    WHERE policy_id = NEW.id AND status = 'approved'
+    WHERE policy_id = NEW.policy_id AND status = 'successful'
+  ) >= (
+    SELECT total_premiums 
+    FROM policies 
+    WHERE id = NEW.policy_id
   ) THEN
-    SET NEW.status = 'expired';
+    UPDATE policies
+    SET status = 'expired'
+    WHERE id = NEW.policy_id;
   END IF;
 END$$
 
 DELIMITER ;
 
+DELIMITER $$
+
+CREATE TRIGGER UpdatePolicyStatusOnClaim
+AFTER INSERT ON claims
+FOR EACH ROW
+BEGIN
+  -- Check if the claim is approved
+  IF NEW.status = 'approved' THEN
+    UPDATE policies
+    SET status = 'expired'
+    WHERE id = NEW.policy_id;
+  END IF;
+END$$
+
+DELIMITER ;

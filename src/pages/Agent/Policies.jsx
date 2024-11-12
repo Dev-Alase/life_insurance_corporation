@@ -6,33 +6,6 @@ const AgentPolicies = () => {
 
   const { user } = useAuth()
   const [policies,setPolicies] = useState([])
-  // Simulated data
-  // const policies = [
-  //   {
-  //     id: 'POL001',
-  //     type: 'Life Insurance',
-  //     status: 'active',
-  //     premium: 150,
-  //     expiry_date: '2025-12-31',
-  //     clientName: 'John Doe'
-  //   },
-  //   {
-  //     id: 'POL002',
-  //     type: 'Health Insurance',
-  //     status: 'active',
-  //     premium: 200,
-  //     expiry_date: '2025-06-30',
-  //     clientName: 'Jane Smith'
-  //   },
-  //   {
-  //     id: 'POL003',
-  //     type: 'Vehicle Insurance',
-  //     status: 'pending',
-  //     premium: 180,
-  //     expiry_date: '2025-08-15',
-  //     clientName: 'Mike Johnson'
-  //   }
-  // ];
 
   useEffect(() => {
 

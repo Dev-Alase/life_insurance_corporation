@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calendar, DollarSign, AlertCircle, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useAuth } from '../../context/AuthContext';
@@ -9,6 +9,7 @@ const PolicyCard = ({ policy, onAction, actionLabel }) => {
   const { user } = useAuth();
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [showClaimDialog, setShowClaimDialog] = useState(false);
+  const [payments,setPayments] = useState([]);
 
   const handlePaymentSuccess = () => {
     if (onAction) onAction(policy);
@@ -18,7 +19,30 @@ const PolicyCard = ({ policy, onAction, actionLabel }) => {
     if (onAction) onAction(policy);
   };
 
-  const paidPremiums = policy.payments?.filter(p => p.status === 'successful').length || 0;
+  useEffect(() =>{
+
+    const getPayments = async() =>{
+
+      const res = await fetch('http://localhost:5000/api/payments',{
+        method : "GET",
+        headers : {
+          "Authorization" : `Bearer ${user.token}`
+        }
+      })
+
+     
+      const data = await res.json();
+      console.log(data)
+      setPayments(data);
+
+    }
+
+
+    getPayments()
+
+  },[])
+
+  const paidPremiums = payments?.filter(p => p.status === 'successful' && p.policy_id === policy.id).length || 0;
   const remainingPremiums = policy.total_premiums - paidPremiums;
 
   return (
@@ -48,16 +72,16 @@ const PolicyCard = ({ policy, onAction, actionLabel }) => {
         <div className="flex items-center text-gray-600">
           <DollarSign className="w-4 h-4 mr-2" />
           <span className="text-sm">
-            Premium: ${policy.premium}/{policy.payment_frequency}
+            Premium: {policy.premium}/{policy.payment_frequency}
           </span>
         </div>
 
-        <div className="flex items-center text-gray-600">
+        {user.user.type != "agent" && <div className="flex items-center text-gray-600">
           <CheckCircle className="w-4 h-4 mr-2" />
           <span className="text-sm">
             Premiums Paid: {paidPremiums}/{policy.total_premiums}
           </span>
-        </div>
+        </div>}
         
         {policy.claims && policy.claims.length > 0 && (
           <div className="flex items-center text-gray-600">

@@ -44,14 +44,14 @@ const AgentDashboard = () => {
   }, [user.token]);
 
   const stats = [
-    { title: 'Total Clients', value: currAgent.number_of_policyholders, icon: Users, color: 'bg-blue-500' },
-    { title: 'Active Policies', value: currAgent.number_of_policies, icon: FileText, color: 'bg-green-500' },
-    { title: 'Pending Claims', value: currAgent.number_of_claims, icon: AlertCircle, color: 'bg-yellow-500' },
-    { title: 'Monthly Revenue', value: currAgent.total_premium * 0.075, icon: TrendingUp, color: 'bg-purple-500' }
+    { title: 'Total Clients', value: currAgent.number_of_policyholders || 0, icon: Users, color: 'bg-blue-500' },
+    { title: 'Active Policies', value: currAgent.number_of_policies || 0, icon: FileText, color: 'bg-green-500' },
+    { title: 'Pending Claims', value: currAgent.number_of_claims || 0, icon: AlertCircle, color: 'bg-yellow-500' },
+    { title: 'Monthly Revenue', value: currAgent.total_premium * 0.075 || 0, icon: TrendingUp, color: 'bg-purple-500' }
   ];
 
-  console.log(pendingPolicies);
-  console.log(pendingClaims);
+  // console.log(pendingPolicies);
+  // console.log(pendingClaims);
 
   return (
     <div className="space-y-6">

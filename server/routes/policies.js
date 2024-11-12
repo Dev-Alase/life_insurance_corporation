@@ -44,6 +44,7 @@ router.post('/new', isPolicyHolder, upload.array('documents', 5), async (req, re
     totalPremiums,
     paymentFrequency,
     claimAmount,
+    expiryDate
   } = req.body;
 
   if (!type || !agentId || !premium || !totalPremiums || !paymentFrequency || !claimAmount) {
@@ -57,11 +58,12 @@ router.post('/new', isPolicyHolder, upload.array('documents', 5), async (req, re
     // Insert new policy record into the database
     const [policyResult] = await pool.query(
       `INSERT INTO policies 
-       (type, status, premium, total_premiums, payment_frequency, claim_amount, policyholder_id, agent_id) 
-       VALUES (?, 'pending', ?, ?, ?, ?, ?, ?)`,
+       (type, status, premium,expiry_date, total_premiums, payment_frequency, claim_amount, policyholder_id, agent_id) 
+       VALUES (?, 'pending', ?,?, ?, ?, ?, ?, ?)`,
       [
         type,
         premium,
+        expiryDate,
         totalPremiums,
         paymentFrequency,
         claimAmount,
@@ -155,9 +157,9 @@ router.patch('/:id', isAgent, async (req, res) => {
 
     await pool.query(
       `UPDATE policies 
-       SET status = ?, premium = ?, expiry_date = ? 
+       SET status = ?
        WHERE id = ? AND agent_id = ?`,
-      [status, premium || null, expiryDate || null, req.params.id, req.user.id]
+      [status, req.params.id, req.user.id]
     );
 
     res.json({ message: 'Policy updated successfully' });

@@ -3,11 +3,14 @@ import { useAuth } from '../../context/AuthContext';
 import { X, Upload, AlertCircle, CheckCircle2, FileText } from 'lucide-react';
 
 const POLICY_TYPES = [
-  'Life Insurance',
-  'Health Insurance',
-  'Vehicle Insurance',
-  'Property Insurance',
-  'Travel Insurance',
+  'Bima Jyoti',
+  'Jeevan Umang',
+  'Jeevan Lakshya',
+  'Endowment Plan',
+  'Jeevan Anand',
+  'Jeevan Shanti',
+  'Adhar Stambha',
+  'Dhan Sanchay'
 ];
 
 const PAYMENT_FREQUENCIES = [
@@ -29,8 +32,40 @@ const NewPolicyDialog = ({ onClose, onSuccess }) => {
   const [premium, setPremium] = useState('');
   const [totalPremiums, setTotalPremiums] = useState('');
   const [paymentFrequency, setPaymentFrequency] = useState('monthly');
-  const [claimAmount, setClaimAmount] = useState('');
   const [files, setFiles] = useState(null);
+
+  // Calculate Maximum Claim Amount dynamically
+  const calculateClaimAmount = () => {
+    const frequencyMultiplier = {
+      monthly: 12,
+      quarterly: 4,
+      yearly: 1,
+    };
+
+    const multiplier = frequencyMultiplier[paymentFrequency] || 1;
+    const totalAmount = premium * totalPremiums ;
+    const claimFactor = 1.5; // Example factor for maximum claim calculation
+
+    return totalAmount * claimFactor;
+  };
+
+  // Calculate Expiry Date dynamically
+  const calculateExpiryDate = () => {
+    const frequencyInMonths = {
+      monthly: 1,
+      quarterly: 3,
+      yearly: 12,
+    };
+
+    const startDate = new Date();
+    const monthsToAdd =
+      (frequencyInMonths[paymentFrequency] || 1) * (totalPremiums || 0);
+    const expiryDate = new Date(
+      startDate.setMonth(startDate.getMonth() + monthsToAdd)
+    );
+
+    return expiryDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+  };
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -62,7 +97,8 @@ const NewPolicyDialog = ({ onClose, onSuccess }) => {
     formData.append('premium', premium);
     formData.append('totalPremiums', totalPremiums);
     formData.append('paymentFrequency', paymentFrequency);
-    formData.append('claimAmount', claimAmount);
+    formData.append('claimAmount', calculateClaimAmount());
+    formData.append('expiryDate', calculateExpiryDate());
 
     if (files) {
       Array.from(files).forEach((file) => {
@@ -198,22 +234,15 @@ const NewPolicyDialog = ({ onClose, onSuccess }) => {
                 placeholder="Enter total number of premiums"
               />
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Maximum Claim Amount
-              </label>
-              <input
-                type="number"
-                value={claimAmount}
-                onChange={(e) => setClaimAmount(e.target.value)}
-                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-                min="0"
-                step="0.01"
-                placeholder="Enter maximum claim amount"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Maximum Claim Amount
+            </label>
+            <p className="p-2 border rounded-md bg-gray-50 text-gray-800">
+              {isNaN(calculateClaimAmount()) ? 'N/A' : calculateClaimAmount().toFixed(2)} INR
+            </p>
           </div>
 
           <div>
@@ -243,49 +272,27 @@ const NewPolicyDialog = ({ onClose, onSuccess }) => {
                 </span>
               </label>
             </div>
-            {files && files.length > 0 && (
-              <div className="mt-2 space-y-2">
-                {Array.from(files).map((file, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm text-gray-600">
-                    <FileText className="w-4 h-4" />
-                    <span>{file.name}</span>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-md">
-              <AlertCircle className="w-5 h-5" />
-              <p className="text-sm">{error}</p>
+            <div className="text-red-600 text-sm flex items-center gap-2">
+              <AlertCircle className="w-5 h-5" /> {error}
             </div>
           )}
 
           {success && (
-            <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-md">
-              <CheckCircle2 className="w-5 h-5" />
-              <p className="text-sm">Policy created successfully!</p>
+            <div className="text-green-600 text-sm flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5" /> Policy created successfully
             </div>
           )}
 
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="bg-gray-100 text-gray-600 px-4 py-2 rounded-md"
-              disabled={loading}
-            >
-              Cancel
-            </button>
+          <div className="flex justify-end">
             <button
               type="submit"
-              className={`px-4 py-2 rounded-md text-white ${
-                loading ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-600'
-              }`}
               disabled={loading}
+              className="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:opacity-50"
             >
-              {loading ? 'Submitting...' : 'Submit'}
+              {loading ? 'Processing...' : 'Submit Request'}
             </button>
           </div>
         </form>
