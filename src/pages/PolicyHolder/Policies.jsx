@@ -2,41 +2,43 @@ import React, { useEffect, useState } from 'react';
 import PolicyCard from '../../components/shared/PolicyCard';
 import { Plus } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import NewPolicyDialog from '../../components/dialogs/NewPolicyDialog';
 
 const PolicyHolderPolicies = () => {
   const [showNewPolicyForm, setShowNewPolicyForm] = useState(false);
   const [policies, setPolicies] = useState([]);
   const { user } = useAuth();
 
-  useEffect(() => {
-    const getPolicies = async () => {
-      if (!user || !user.token) return; // Ensure user is logged in with a token
+  const fetchPolicies = async () => {
+    if (!user || !user.token) return;
 
-      try {
-        const response = await fetch("http://localhost:5000/api/policies", {
-          method: "GET",
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${user.token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch policies');
+    try {
+      const response = await fetch("http://localhost:5000/api/policies", {
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.token}`
         }
+      });
 
-        const data = await response.json();
-        setPolicies(data);
-      } catch (error) {
-        console.error('Error fetching policies:', error);
+      if (!response.ok) {
+        throw new Error('Failed to fetch policies');
       }
-    };
 
-    getPolicies();
-  }, []);
+      const data = await response.json();
+      setPolicies(data);
+    } catch (error) {
+      console.error('Error fetching policies:', error);
+    }
+  };
 
+  useEffect(() => {
+    fetchPolicies();
+  }, [user]);
 
-  // console.log(user)
+  const handlePolicyAction = () => {
+    fetchPolicies();
+  };
 
   return (
     <div className="space-y-6">
@@ -56,36 +58,19 @@ const PolicyHolderPolicies = () => {
           <PolicyCard
             key={policy.id}
             policy={policy}
-            onAction={(policy) => console.log('Policy action:', policy)}
-            actionLabel={policy.status === 'active' ? 'Pay Premium' : 'View Details'}
+            onAction={handlePolicyAction}
           />
         ))}
       </div>
 
       {showNewPolicyForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h2 className="text-xl font-semibold mb-4">Request New Policy</h2>
-            {/* Add form fields here */}
-            <div className="flex justify-end space-x-4 mt-6">
-              <button
-                onClick={() => setShowNewPolicyForm(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  console.log('Submit new policy request');
-                  setShowNewPolicyForm(false);
-                }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Submit Request
-              </button>
-            </div>
-          </div>
-        </div>
+        <NewPolicyDialog
+          onClose={() => setShowNewPolicyForm(false)}
+          onSuccess={() => {
+            setShowNewPolicyForm(false);
+            fetchPolicies();
+          }}
+        />
       )}
     </div>
   );

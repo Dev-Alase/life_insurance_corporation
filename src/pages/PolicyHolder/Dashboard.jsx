@@ -6,112 +6,119 @@ import { useAuth } from '../../context/AuthContext';
 import ClaimCard from '../../components/shared/CliamCard';
 
 const PolicyHolderDashboard = () => {
+  const { user } = useAuth();
 
-  const {user} = useAuth()
-
-  // console.log(user)
-
-  const [userInfo,setUserInfo] = useState({})
-  const [claims,setClaims] = useState([])
-   // Simulated data
-  const recentPolicies = [
-    {
-      id: 'POL001',
-      type: 'Life Insurance',
-      status: 'active',
-      premium: 150,
-      expiry_date: '2025-12-31',
-      claimStatus: null
-    },
-    {
-      id: 'POL002',
-      type: 'Health Insurance',
-      status: 'active',
-      premium: 200,
-      expiry_date: '2025-06-30',
-      claimStatus: 'processing'
-    }
-  ];
+  const [userInfo, setUserInfo] = useState({});
+  const [claims, setClaims] = useState([]);
+  const [loadingUserInfo, setLoadingUserInfo] = useState(true);
+  const [loadingClaims, setLoadingClaims] = useState(true);
 
   useEffect(() => {
+    if (!user?.token) {
+      console.error("User token not found!");
+      return;
+    }
 
     const getInfo = async () => {
+      try {
+        setLoadingUserInfo(true);
+        const response = await fetch("http://localhost:5000/api/users/summary", {
+          method: "GET",
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user?.token}`,
+          },
+        });
 
-      const response = await fetch("http://localhost:5000/api/users/summary",{
-        method : "GET",
-        headers : {
-          'Content-Type' : 'application/json',
-          'Authorization' : `Bearer ${user?.token}`
+        if (!response.ok) {
+          throw new Error("Failed to fetch user info");
         }
-      })
-      
-      const data = await response.json();
 
-      // console.log(data)
-      setUserInfo(data)
-
-    }
+        const data = await response.json();
+        console.log("Fetched userInfo:", data);
+        setUserInfo(data);
+      } catch (error) {
+        console.error("Error fetching user info:", error);
+      } finally {
+        setLoadingUserInfo(false);
+      }
+    };
 
     const getClaims = async () => {
+      try {
+        setLoadingClaims(true);
+        const response = await fetch("http://localhost:5000/api/claims", {
+          method: "GET",
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user?.token}`,
+          },
+        });
 
-      const response = await fetch("http://localhost:5000/api/claims",{
-        method : "GET",
-        headers : {
-          'Content-Type' : 'application/json',
-          'Authorization' :  `Bearer ${user?.token}`
+        if (!response.ok) {
+          throw new Error("Failed to fetch claims");
         }
-      })
 
-      let data = await response.json();
-      // data = data.filter((item) => item.status == "pending")
+        const data = await response.json();
+        console.log("Fetched claims:", data);
+        setClaims(data);
+      } catch (error) {
+        console.error("Error fetching claims:", error);
+      } finally {
+        setLoadingClaims(false);
+      }
+    };
 
-      setClaims(data)
-      console.log(data)
-
-    }
-
-    getInfo()
-    getClaims()
-
-  },[])
-
+    getInfo();
+    getClaims();
+  }, [user?.token]);
 
   const stats = [
-    { title: 'Active Policies', value: userInfo.number_of_policies || 0, icon: FileText, color: 'bg-blue-500' },
-    { title: 'Total Premium', value: userInfo.total_premium || 0, icon: DollarSign, color: 'bg-green-500' },
-    { title: 'Active Claims', value: userInfo.number_of_claims || 0, icon: AlertCircle, color: 'bg-yellow-500' },
-    { title: 'My Agents', value: userInfo.number_of_agents || 0, icon: Users, color: 'bg-purple-500' }
+    { title: 'Active Policies', value: userInfo?.number_of_policies || 0, icon: FileText, color: 'bg-blue-500' },
+    { title: 'Total Premium', value: userInfo?.total_premium || 0, icon: DollarSign, color: 'bg-green-500' },
+    { title: 'Active Claims', value: userInfo?.number_of_claims || 0, icon: AlertCircle, color: 'bg-yellow-500' },
+    { title: 'My Agents', value: userInfo?.number_of_agents || 0, icon: Users, color: 'bg-purple-500' },
   ];
-
 
   return (
     <div className="space-y-6">
-
       <div>
-        <p className='text-4xl font-semibold'> Hello, {user.user.fullName} </p>
+        <p className="text-4xl font-semibold">
+          Hello, {user?.user?.fullName || 'Guest'}
+        </p>
       </div>
 
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <StatsCard key={stat.title} {...stat} />
-        ))}
+        {loadingUserInfo ? (
+          <p>Loading stats...</p>
+        ) : stats.length > 0 ? (
+          stats.map((stat, index) => (
+            <StatsCard key={stat.title || index} {...stat} />
+          ))
+        ) : (
+          <p>No stats available</p>
+        )}
       </div>
 
       <div>
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Claims</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {claims.map((claim) => (
-            <ClaimCard
-              key={claim.id}
-              claim={claim}
-              onAction={(claim) => console.log('Claim action:', claim)}
-              actionLabel="View Details"
-            />
-          ))}
-        </div>
+        {loadingClaims ? (
+          <p>Loading claims...</p>
+        ) : claims.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {claims.map((claim) => (
+              <ClaimCard
+                key={claim.id}
+                claim={claim}
+                onAction={(claim) => console.log("Claim action:", claim)}
+                actionLabel="View Details"
+              />
+            ))}
+          </div>
+        ) : (
+          <p>No claims available</p>
+        )}
       </div>
-
     </div>
   );
 };

@@ -58,3 +58,131 @@ CREATE TABLE IF NOT EXISTS agent_ratings (
   FOREIGN KEY (agent_id) REFERENCES users(id),
   FOREIGN KEY (policyholder_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+
+ALTER TABLE policies ADD pdf LONGBLOB;
+ALTER TABLE claims ADD pdf LONGBLOB;
+
+
+ALTER TABLE policies
+ADD COLUMN total_premiums INT NOT NULL DEFAULT 1, -- Total number of premiums to be paid
+ADD COLUMN payment_frequency ENUM('monthly', 'quarterly', 'yearly') NOT NULL DEFAULT 'monthly', -- Payment schedule
+ADD COLUMN claim_amount DECIMAL(10,2) NOT NULL DEFAULT 0.00; -- Amount paid to policyholder on a claim
+
+
+-- Fuctions -- 
+
+DELIMITER $$
+
+CREATE FUNCTION GetAgentAverageRating(agent_id INT)
+RETURNS DECIMAL(3,2)
+DETERMINISTIC
+BEGIN
+  DECLARE average_rating DECIMAL(3,2);
+  SELECT AVG(rating) INTO average_rating
+  FROM agent_ratings
+  WHERE agent_id = agent_id;
+  RETURN COALESCE(average_rating, 0);
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE FUNCTION get_summary(user_type ENUM('policyholder', 'agent'), user_id INT)
+RETURNS JSON
+DETERMINISTIC
+BEGIN
+    DECLARE result JSON;
+
+    IF user_type = 'policyholder' THEN
+        SET result = JSON_OBJECT(
+            'number_of_policies', (
+                SELECT COUNT(p.id) 
+                FROM policies p 
+                WHERE p.policyholder_id = user_id
+            ),
+            'total_premium', (
+                SELECT COALESCE(SUM(p.premium), 0) 
+                FROM policies p 
+                WHERE p.policyholder_id = user_id
+            ),
+            'number_of_agents', (
+                SELECT COUNT(DISTINCT p.agent_id) 
+                FROM policies p 
+                WHERE p.policyholder_id = user_id
+            ),
+            'number_of_claims', (
+                SELECT COUNT(c.id) 
+                FROM claims c
+                JOIN policies p ON c.policy_id = p.id
+                WHERE p.policyholder_id = user_id
+            )
+        );
+    ELSEIF user_type = 'agent' THEN
+        SET result = JSON_OBJECT(
+            'number_of_policies', (
+                SELECT COUNT(p.id) 
+                FROM policies p 
+                WHERE p.agent_id = user_id
+            ),
+            'total_premium', (
+                SELECT COALESCE(SUM(p.premium), 0) 
+                FROM policies p 
+                WHERE p.agent_id = user_id
+            ),
+            'number_of_policyholders', (
+                SELECT COUNT(DISTINCT p.policyholder_id) 
+                FROM policies p 
+                WHERE p.agent_id = user_id
+            ),
+            'number_of_claims', (
+                SELECT COUNT(c.id) 
+                FROM claims c
+                JOIN policies p ON c.policy_id = p.id
+                WHERE p.agent_id = user_id
+            )
+        );
+    ELSE
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid user type';
+    END IF;
+
+    RETURN result;
+END$$
+
+DELIMITER ;
+
+
+-- -- Triggers --
+
+DELIMITER $$
+
+CREATE TRIGGER UpdatePolicyStatusOnExpiry
+BEFORE UPDATE ON policies
+FOR EACH ROW
+BEGIN
+  -- Check if the expiry date is in the past
+  IF NEW.expiry_date < CURDATE() THEN
+    SET NEW.status = 'expired';
+  
+  -- Check if the number of premiums paid has reached the total number of premiums
+  ELSEIF (
+    SELECT COUNT(*) 
+    FROM payments 
+    WHERE policy_id = NEW.id AND status = 'successful'
+  ) >= NEW.total_premiums THEN
+    SET NEW.status = 'expired';
+
+  -- Check if there are any approved claims for this policy
+  ELSEIF EXISTS (
+    SELECT 1 
+    FROM claims 
+    WHERE policy_id = NEW.id AND status = 'approved'
+  ) THEN
+    SET NEW.status = 'expired';
+  END IF;
+END$$
+
+DELIMITER ;
+

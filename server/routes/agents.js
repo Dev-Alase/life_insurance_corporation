@@ -51,17 +51,7 @@ router.post('/:id/rate', isPolicyHolder, async (req, res) => {
   }
 });
 
-// p.id AS policy_id, 
-// p.type AS policy_type, 
-// p.status AS policy_status, 
-// p.premium, 
-// p.expiry_date, 
-// p.created_at AS policy_created_at,
-// c.id AS claim_id,
-// c.amount AS claim_amount, 
-// c.description AS claim_description, 
-// c.status AS claim_status, 
-// c.created_at AS claim_created_at
+
 
 router.get('/approvals', isAgent, async (req, res) => {
   try {
