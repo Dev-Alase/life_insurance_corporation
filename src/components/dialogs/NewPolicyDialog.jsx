@@ -7,13 +7,13 @@ const POLICY_TYPES = [
   'Health Insurance',
   'Vehicle Insurance',
   'Property Insurance',
-  'Travel Insurance'
+  'Travel Insurance',
 ];
 
 const PAYMENT_FREQUENCIES = [
   { label: 'Monthly', value: 'monthly' },
   { label: 'Quarterly', value: 'quarterly' },
-  { label: 'Yearly', value: 'yearly' }
+  { label: 'Yearly', value: 'yearly' },
 ];
 
 const NewPolicyDialog = ({ onClose, onSuccess }) => {
@@ -37,8 +37,8 @@ const NewPolicyDialog = ({ onClose, onSuccess }) => {
       try {
         const response = await fetch('http://localhost:5000/api/agents', {
           headers: {
-            'Authorization': `Bearer ${user.token}`
-          }
+            Authorization: `Bearer ${user.token}`,
+          },
         });
         if (!response.ok) throw new Error('Failed to fetch agents');
         const data = await response.json();
@@ -58,12 +58,12 @@ const NewPolicyDialog = ({ onClose, onSuccess }) => {
 
     const formData = new FormData();
     formData.append('type', type);
-    formData.append('agent_id', agentId);
+    formData.append('agentId', agentId);
     formData.append('premium', premium);
-    formData.append('total_premiums', totalPremiums);
-    formData.append('payment_frequency', paymentFrequency);
-    formData.append('claim_amount', claimAmount);
-    
+    formData.append('totalPremiums', totalPremiums);
+    formData.append('paymentFrequency', paymentFrequency);
+    formData.append('claimAmount', claimAmount);
+
     if (files) {
       Array.from(files).forEach((file) => {
         formData.append('documents', file);
@@ -71,12 +71,12 @@ const NewPolicyDialog = ({ onClose, onSuccess }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/policies', {
+      const response = await fetch('http://localhost:5000/api/policies/new', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${user.token}`
+          Authorization: `Bearer ${user.token}`,
         },
-        body: formData
+        body: formData,
       });
 
       if (!response.ok) {
@@ -101,7 +101,7 @@ const NewPolicyDialog = ({ onClose, onSuccess }) => {
       <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Request New Policy</h2>
-          <button 
+          <button
             onClick={onClose}
             disabled={loading}
             className="text-gray-500 hover:text-gray-700 disabled:opacity-50"
@@ -124,7 +124,9 @@ const NewPolicyDialog = ({ onClose, onSuccess }) => {
               >
                 <option value="">Select a policy type</option>
                 {POLICY_TYPES.map((type) => (
-                  <option key={type} value={type}>{type}</option>
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
                 ))}
               </select>
             </div>
@@ -263,37 +265,27 @@ const NewPolicyDialog = ({ onClose, onSuccess }) => {
           {success && (
             <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-md">
               <CheckCircle2 className="w-5 h-5" />
-              <p className="text-sm">Policy request submitted successfully!</p>
+              <p className="text-sm">Policy created successfully!</p>
             </div>
           )}
 
-          <div className="flex justify-end space-x-4">
+          <div className="flex justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
+              className="bg-gray-100 text-gray-600 px-4 py-2 rounded-md"
               disabled={loading}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={loading || success}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className={`px-4 py-2 rounded-md text-white ${
+                loading ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-600'
+              }`}
+              disabled={loading}
             >
-              {loading ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                  Submitting...
-                </>
-              ) : success ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4" />
-                  Submitted
-                </>
-              ) : (
-                'Submit Request'
-              )}
+              {loading ? 'Submitting...' : 'Submit'}
             </button>
           </div>
         </form>
