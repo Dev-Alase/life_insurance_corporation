@@ -35,7 +35,7 @@ const PolicyHolderDashboard = () => {
         }
 
         const data = await response.json();
-        console.log("Fetched userInfo:", data);
+        // console.log("Fetched userInfo:", data);
         setUserInfo(data);
       } catch (error) {
         console.error("Error fetching user info:", error);
@@ -60,7 +60,7 @@ const PolicyHolderDashboard = () => {
         }
 
         const data = await response.json();
-        console.log("Fetched claims:", data);
+        // console.log("Fetched claims:", data);
         setClaims(data);
       } catch (error) {
         console.error("Error fetching claims:", error);
@@ -92,7 +92,7 @@ const PolicyHolderDashboard = () => {
         {loadingUserInfo ? (
           <p>Loading stats...</p>
         ) : stats.length > 0 ? (
-          stats.map((stat, index) => (
+          stats?.map((stat, index) => (
             <StatsCard key={stat.title || index} {...stat} />
           ))
         ) : (
@@ -104,9 +104,9 @@ const PolicyHolderDashboard = () => {
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Claims</h2>
         {loadingClaims ? (
           <p>Loading claims...</p>
-        ) : claims.length > 0 ? (
+        ) : claims?.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {claims.map((claim) => (
+            {claims?.map((claim) => (
               <ClaimCard
                 key={claim.id}
                 claim={claim}

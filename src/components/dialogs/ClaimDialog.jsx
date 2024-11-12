@@ -11,13 +11,14 @@ const ClaimDialog = ({ policy, onClose, onSuccess }) => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     const formData = new FormData();
-    formData.append('policy_id', policy.id.toString());
+    formData.append('policyId', policy.id);
     formData.append('description', description);
     formData.append('amount', amount);
     
@@ -28,7 +29,7 @@ const ClaimDialog = ({ policy, onClose, onSuccess }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/claims', {
+      const response = await fetch('http://localhost:5000/api/claims/new', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${user.token}`

@@ -1,8 +1,39 @@
 import express from 'express';
 import pool from '../config/database.js';
 import { isAgent, isPolicyHolder } from '../middleware/auth.js';
+import fs from 'fs'
+import multer from 'multer'
 
 const router = express.Router();
+
+// Ensure the uploads directory exists
+const uploadDir = './uploads';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, uploadDir); // Directory for storing files
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}-${file.originalname}`;
+      cb(null, uniqueSuffix);
+    },
+  }),
+  fileFilter: (req, file, cb) => {
+    const allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only PDF, JPG, and PNG are allowed.'));
+    }
+  },
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit
+});
+
 
 // Get claims (filtered by user type)
 router.get('/', async (req, res) => {
@@ -38,10 +69,10 @@ router.get('/', async (req, res) => {
 });
 
 // Submit new claim
-router.post('/', isPolicyHolder, async (req, res) => {
+router.post('/new', isPolicyHolder, upload.array('documents', 5), async (req, res) => {
   try {
     const { policyId, amount, description } = req.body;
-    
+    console.log(policyId,req.user.id)
     // Verify policy belongs to user
     const [policies] = await pool.query(
       'SELECT * FROM policies WHERE id = ? AND policyholder_id = ?',

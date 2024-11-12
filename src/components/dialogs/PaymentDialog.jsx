@@ -12,6 +12,7 @@ const PaymentDialog = ({ policy, onClose, onSuccess }) => {
   const remainingPremiums = policy.total_premiums - paidPremiums;
   const totalDue = policy.premium * remainingPremiums;
 
+
   const handlePayment = async () => {
     setLoading(true);
     setError(null);
@@ -24,7 +25,7 @@ const PaymentDialog = ({ policy, onClose, onSuccess }) => {
           'Authorization': `Bearer ${user.token}`
         },
         body: JSON.stringify({
-          policy_id: policy.id,
+          policyId: policy.id,
           amount: policy.premium
         })
       });

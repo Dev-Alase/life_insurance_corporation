@@ -21,7 +21,7 @@ const AgentDashboard = () => {
       });
 
       const data = await response.json();
-      console.log(data);
+      // console.log(data);
       setCurrAgent(data);
     };
 
@@ -60,7 +60,7 @@ const AgentDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
+        {stats?.map((stat) => (
           <StatsCard key={stat.title} {...stat} />
         ))}
       </div>
@@ -68,7 +68,7 @@ const AgentDashboard = () => {
       {pendingPolicies.length > 0 &&  <div>
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Pending Policies</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {pendingPolicies.map((policy) => (
+          {pendingPolicies?.map((policy) => (
             <ApprovalCard
               key={policy.id}
               item={policy} 
@@ -82,7 +82,7 @@ const AgentDashboard = () => {
       { pendingClaims.length > 0 && <div>
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Pending Claims</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {pendingClaims.map((claim) => (
+          {pendingClaims?.map((claim) => (
             <ApprovalCard
               key={claim.id}
               item={claim}
