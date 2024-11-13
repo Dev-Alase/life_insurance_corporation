@@ -10,11 +10,16 @@ import PaymentHistory from './pages/PolicyHolder/PaymentHistory';
 import AgentList from './pages/PolicyHolder/AgentList';
 import { AuthProvider } from './context/AuthContext';
 import Layout from './components/Layout';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Import default styles
 
 function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        {/* ToastContainer to handle all toasts */}
+        <ToastContainer position="top-right" autoClose={5000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover />
+        
         <Routes>
           <Route path="/" element={<LandingPage />} />
           

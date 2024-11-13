@@ -98,5 +98,20 @@ router.get('/approvals', isAgent, async (req, res) => {
   }
 });
 
+router.post('/:id/send-email', async (req, res) => {
+  try {
+    const { message } = req.body;
+
+    // Simulate email sending logic
+    console.log(`Email sent to agent ${req.params.id}: ${message}`);
+
+    res.json({ message: 'Email sent successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error while sending email' });
+  }
+});
+
+
 
 export default router;

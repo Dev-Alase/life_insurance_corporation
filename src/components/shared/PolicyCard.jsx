@@ -32,7 +32,7 @@ const PolicyCard = ({ policy, onAction, actionLabel }) => {
 
      
       const data = await res.json();
-      console.log(data)
+      // console.log(data)
       setPayments(data);
 
     }
