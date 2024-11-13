@@ -162,7 +162,7 @@ CREATE TRIGGER UpdatePolicyStatusOnPayment
 AFTER INSERT ON payments
 FOR EACH ROW
 BEGIN
-  -- Check if all premiums have been paid
+
   IF (
     SELECT COUNT(*) 
     FROM payments 
@@ -180,21 +180,31 @@ END$$
 
 DELIMITER ;
 
+-- Procedure --
+
 DELIMITER $$
 
-CREATE TRIGGER UpdatePolicyStatusOnClaim
-AFTER INSERT ON claims
-FOR EACH ROW
+CREATE PROCEDURE UpdateClaimAndPolicyStatus(
+  IN claimId INT,
+  IN agentId INT,
+  IN newStatus VARCHAR(20)
+)
 BEGIN
-  -- Check if the claim is approved
-  IF NEW.status = 'approved' THEN
+  -- Update claim status
+  UPDATE claims
+  SET status = newStatus
+  WHERE id = claimId;
+
+  -- Update policy status if claim is approved
+  IF newStatus = 'approved' THEN
     UPDATE policies
     SET status = 'expired'
-    WHERE id = NEW.policy_id;
+    WHERE id = (SELECT policy_id FROM claims WHERE id = claimId) AND agent_id = agentId;
   END IF;
 END$$
 
 DELIMITER ;
+
 
 --  Roles --
 

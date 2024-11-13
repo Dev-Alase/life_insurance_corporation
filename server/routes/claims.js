@@ -106,14 +106,10 @@ router.post('/new', isPolicyHolder, upload.array('documents', 5), async (req, re
 router.patch('/:id', isAgent, async (req, res) => {
   try {
     const { status } = req.body;
-    
-    await pool.query(
-      `UPDATE claims c
-       JOIN policies p ON c.policy_id = p.id
-       SET c.status = ?
-       WHERE c.id = ? AND p.agent_id = ?`,
-      [status, req.params.id, req.user.id]
-    );
+    const claimId = req.params.id;
+    const agentId = req.user.id;
+
+    await pool.query('CALL UpdateClaimAndPolicyStatus(?, ?, ?)', [claimId, agentId, status]);
 
     res.json({ message: 'Claim updated successfully' });
   } catch (error) {
@@ -121,5 +117,6 @@ router.patch('/:id', isAgent, async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 export default router;
