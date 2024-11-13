@@ -19,7 +19,9 @@ const ApprovalCard = ({ item, onAction }) => {
         ? `http://localhost:5000/api/claims/${item.id}`
         : `http://localhost:5000/api/policies/${item.id}`;
         
-      const status = isClaim ? (approved ? 'approved' : 'rejected') : approved ? 'active' : 'cancelled';  // Update status dynamically
+      const status = isClaim
+        ? approved ? 'approved' : 'rejected'
+        : approved ? 'active' : 'cancelled'; // Update status dynamically
 
       const response = await fetch(endpoint, {
         method: 'PATCH',
@@ -48,26 +50,26 @@ const ApprovalCard = ({ item, onAction }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-semibold">
+    <div className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 hover:shadow-xl">
+      <h3 className="text-xl font-semibold text-gray-800 mb-2">
         {isClaim ? `Claim Request #${item.id}` : `Policy Request #${item.id}`}
       </h3>
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-gray-500 mb-4">
         {isClaim ? `Policy #${item.policy_id}` : item.type}
       </p>
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-gray-600 mb-6">
         <span className="font-medium">Amount:</span> ${isClaim ? item.amount : item.premium}
       </p>
 
       {error && (
-        <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-md mb-4">
+        <div className="flex items-center gap-2 text-red-700 bg-red-100 p-3 rounded-lg mb-4">
           <AlertCircle className="w-5 h-5" />
           <p className="text-sm">{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-md mb-4">
+        <div className="flex items-center gap-2 text-green-700 bg-green-100 p-3 rounded-lg mb-4">
           <CheckCircle2 className="w-5 h-5" />
           <p className="text-sm">Action completed successfully!</p>
         </div>
@@ -77,16 +79,16 @@ const ApprovalCard = ({ item, onAction }) => {
         <button
           onClick={() => handleApproval(true)}
           disabled={loading || success}
-          className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
-          {loading ? 'Loading...' : 'Approve'}
+          {loading ? 'Processing...' : 'Approve'}
         </button>
         <button
           onClick={() => handleApproval(false)}
           disabled={loading || success}
-          className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
-          {loading ? 'Loading...' : 'Reject'}
+          {loading ? 'Processing...' : 'Reject'}
         </button>
       </div>
     </div>

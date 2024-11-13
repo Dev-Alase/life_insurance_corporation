@@ -156,7 +156,7 @@ router.get('/summary', async (req, res) => {
       if (req.user.type === 'policyholder') {
           query = `
               SELECT 
-                  COUNT(p.id) AS number_of_policies,
+                  COUNT(CASE WHEN p.status = 'active' THEN 1 END) AS number_of_policies,
                   SUM(p.premium) AS total_premium,
                   COUNT(DISTINCT p.agent_id) AS number_of_agents,
                   COUNT(CASE WHEN c.status = 'PENDING' THEN 1 END) AS number_of_pending_claims
@@ -168,7 +168,7 @@ router.get('/summary', async (req, res) => {
       } else {
           query = `
               SELECT 
-                  COUNT(p.id) AS number_of_policies,
+                  COUNT(CASE WHEN p.status = 'active' THEN 1 END) AS number_of_policies,
                   SUM(p.premium) AS total_premium,
                   COUNT(DISTINCT p.policyholder_id) AS number_of_policyholders,
                   COUNT(CASE WHEN c.status = 'PENDING' THEN 1 END) AS number_of_pending_claims
